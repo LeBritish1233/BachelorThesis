@@ -52,9 +52,11 @@ def getNormalisedData(filename):
 
     return normalisedData
 
-def splitData(data):
-    # split data into training and validation data with around 90% going towards training
-    trainingData = data[:(int)(0.9*data.shape[0]), :]
-    validationData = data[(int)(0.9*data.shape[0]):, :]
+def getAverageRelativeError(data, predictedData):
+    avgRelErr = 0
+    for i in range(data.shape[0]):
+        avgRelErr += np.linalg.norm(data[i, :]-predictedData[i, :])/np.linalg.norm(data[i, :])
 
-    return [trainingData, validationData]
+    avgRelErr /= data.shape[0]
+
+    return avgRelErr

@@ -1,50 +1,63 @@
 import data_tools as dt
 import autoencoder_tools as at
-import time
 import numpy as np
 
-def findAndSaveModel(filename):
-    print('Retrieving data...\n')
-    startTimer = time.perf_counter()
-    startProcessorTimer = time.process_time()
+def findBestHiddenLayerSize(datasetNames, maxAvgRelErr):
+    bestHiddenLayerSize = 1
+    for datasetName in datasetNames:
+        data = dt.getNormalisedData(datasetName)
 
-    data = dt.getNormalisedData(filename)
+        # test if the current best hidden layer is satisfactory to the dataset, if such is the case move to the next dataset
+        [autoencoder, _] = at.buildAndTrainAutoencoder(bestHiddenLayerSize, data)
 
-    [trainingData, validationData] = dt.splitData(data)
+        predictedData = autoencoder.predict(data)
 
-    print('Data retrieved :')
-    print('Time : ' + str(time.perf_counter()-startTimer))
-    print('Processor time : ' + str(time.process_time()-startProcessorTimer) + '\n')
+        avgRelErr = dt.getAverageRelativeError(data, predictedData)
 
-    print('Finding the optimal architecture for the data...\n')
-    startTimer = time.perf_counter()
-    startProcessorTimer = time.process_time()
+        if avgRelErr <= maxAvgRelErr:
+            print('')
+            print(datasetName)
+            print(avgRelErr)
+            print(bestHiddenLayerSize)
+            print('')
+            continue
 
-    layerSizes = at.findAutoencoderArchitecture(trainingData, validationData)
+        # test if the maximum number of units has already been reached
+        if bestHiddenLayerSize == data.shape[1]:
+            print('')
+            print(datasetName)
+            print(avgRelErr)
+            print(bestHiddenLayerSize)
+            print('')
+            continue
 
-    print('Optimal architecture found :')
-    print('Time : ' + str(time.perf_counter()-startTimer))
-    print('Processor time : ' + str(time.process_time()-startProcessorTimer) + '\n')
+        # perform a binary search to find the lowest number of units in the hidden layer such that the average relative error is lower than or equal to the given maximum relative error
+        l = bestHiddenLayerSize+1
 
-    print('Training the model...\n')
-    startTimer = time.perf_counter()
-    startProcessorTimer = time.process_time()
+        r = data.shape[1]
 
-    [autoencoder, encoder] = at.buildAndTrainAutoencoder(layerSizes, trainingData, validationData)
+        while l != r:
+            m = (int)(np.floor((l+r)/2))
 
-    print('Model trained :')
-    print('Time : ' + str(time.perf_counter()-startTimer))
-    print('Processor time : ' + str(time.process_time()-startProcessorTimer) + '\n')
+            [autoencoder, _] = at.buildAndTrainAutoencoder(m, data)
 
-    at.saveAutoencoder(autoencoder, encoder, filename)
+            predictedData = autoencoder.predict(data)
 
-    test = autoencoder.predict(validationData)
+            avgRelErr = dt.getAverageRelativeError(data, predictedData)
 
-    avgDist = 0
+            if avgRelErr <= maxAvgRelErr:
+                r = m
+            else:
+                l = m+1
 
-    for i in range(test.shape[0]):
-        avgDist += np.linalg.norm(test[i, :]-validationData[i, :])
+            if l == r:
+                print('')
+                print(datasetName)
+                print(avgRelErr)
+                print(l)
+                print('')
 
-    avgDist /= test.shape[0]
-    
-    print(avgDist)
+        bestHiddenLayerSize = l
+
+    return bestHiddenLayerSize
+
