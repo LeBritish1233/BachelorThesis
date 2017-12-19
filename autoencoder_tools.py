@@ -20,7 +20,7 @@ def buildAutoencoder(layerSizes):
 
     return [autoencoder, encoder]
 
-def buildAndTrainAutoencoder(hiddenLayerSize, data, autoencoderLearningConvergence, autoencoderMaxEpochs):
+def buildAndTrainAutoencoder(hiddenLayerSize, data, targetData, autoencoderLearningConvergence, autoencoderMaxEpochs):
     layerSizes = [data.shape[1], hiddenLayerSize]
 
     [autoencoder, encoder] = buildAutoencoder(layerSizes)
@@ -30,10 +30,11 @@ def buildAndTrainAutoencoder(hiddenLayerSize, data, autoencoderLearningConvergen
     epochCounter = 0
 
     while True:
-        history = autoencoder.fit(data, data, epochs=1, verbose=0, validation_split = 0.1)
+        history = autoencoder.fit(data, targetData, epochs=1, verbose=0, validation_split = 0.1)
 
         loss = history.history['loss'][-1]
-       
+      
+        print(np.linalg.norm(loss - lastLoss))
         if np.linalg.norm(loss - lastLoss) < autoencoderLearningConvergence or epochCounter >= autoencoderMaxEpochs:
             break
 
