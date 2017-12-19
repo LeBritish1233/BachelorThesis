@@ -2,13 +2,13 @@ import data_tools as dt
 import autoencoder_tools as at
 import numpy as np
 
-def findBestHiddenLayerSize(datasetNames, maxAvgRelErr):
+def findBestHiddenLayerSizeAide(datasetNames, autoencoderLearningConvergence, autoencoderMaxEpochs, maxAvgRelErr):
     bestHiddenLayerSize = 1
     for datasetName in datasetNames:
         data = dt.getNormalisedData(datasetName)
 
         # test if the current best hidden layer is satisfactory to the dataset, if such is the case move to the next dataset
-        [autoencoder, _] = at.buildAndTrainAutoencoder(bestHiddenLayerSize, data)
+        [autoencoder, _] = at.buildAndTrainAutoencoder(bestHiddenLayerSize, data, autoencoderLearningConvergence, autoencoderMaxEpochs)
 
         predictedData = autoencoder.predict(data)
 
@@ -39,7 +39,7 @@ def findBestHiddenLayerSize(datasetNames, maxAvgRelErr):
         while l != r:
             m = (int)(np.floor((l+r)/2))
 
-            [autoencoder, _] = at.buildAndTrainAutoencoder(m, data)
+            [autoencoder, _] = at.buildAndTrainAutoencoder(m, data, autoencoderLearningConvergence, autoencoderMaxEpochs)
 
             predictedData = autoencoder.predict(data)
 
@@ -61,3 +61,13 @@ def findBestHiddenLayerSize(datasetNames, maxAvgRelErr):
 
     return bestHiddenLayerSize
 
+def findBestHiddenLayerSize(datasetNames, autoencoderLearningConvergence, autoencoderMaxEpochs, maxAvgRelErr, nSearches):
+
+    bestHiddenLayerSize = 0
+
+    for i in range(nSearches):
+        bestHiddenLayerSize += findBestHiddenLayerSizeAide(datasetNames, autoencoderLearningConvergence, autoencoderMaxEpochs, maxAvgRelErr)
+
+    bestHiddenLayerSize = (int)(np.round(bestHiddenLayerSize/nSearches))
+
+    return bestHiddenLayerSize
