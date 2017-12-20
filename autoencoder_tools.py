@@ -3,6 +3,21 @@ from keras.models import Model, load_model
 from keras import regularizers
 import numpy as np
 
+def getLayerSizes(autoencoderType, dataType):
+    if autoencoderType == 0:
+        if dataType == 0:
+            return [161, 10]
+        else:
+            return [161, 5]
+    elif autoencoderType == 1:
+        if dataType == 0:
+            return [161, 5]
+        else:
+            return [161, 5]
+    if dataType == 0:
+        return [161, 5]
+    return [161, 5]
+
 def buildAutoencoder(layerSizes):
     inputLayer = Input(shape=(layerSizes[0],))
     layer = Dense(layerSizes[1], activation='relu', activity_regularizer=regularizers.l1(1e-7))(inputLayer)
@@ -20,8 +35,8 @@ def buildAutoencoder(layerSizes):
 
     return [autoencoder, encoder]
 
-def buildAndTrainAutoencoder(hiddenLayerSize, data, targetData, autoencoderLearningConvergence, autoencoderMaxEpochs):
-    layerSizes = [data.shape[1], hiddenLayerSize]
+def buildAndTrainAutoencoder(autoencoderType, data, dataType):
+    layerSizes = getLayerSizes(autoencoderType, dataType)
 
     [autoencoder, encoder] = buildAutoencoder(layerSizes)
 
@@ -30,25 +45,17 @@ def buildAndTrainAutoencoder(hiddenLayerSize, data, targetData, autoencoderLearn
     epochCounter = 0
 
     while True:
-        history = autoencoder.fit(data, targetData, epochs=1, verbose=0, validation_split = 0.1)
+        history = autoencoder.fit(data, data, epochs=1, verbose=0)
 
         loss = history.history['loss'][-1]
-      
-        print(np.linalg.norm(loss - lastLoss))
-        if np.linalg.norm(loss - lastLoss) < autoencoderLearningConvergence or epochCounter >= autoencoderMaxEpochs:
+        
+        if np.linalg.norm(lastLoss - loss) < 1e-6 or epochCounter >= 240:
             break
 
         lastLoss = loss
         epochCounter += 1
 
     return [autoencoder, encoder]
-
-def saveAutoencoder(autoencoder, encoder, name):
-    autoencoder.save('saved_models/'+name+'_autoencoder.h5')
-    encoder.save('saved_models/'+name+'_encoder.h5')
-
-def loadAutoencoder(name):
-    autoencoder = load_model('saved_models/'+name+'_autoencoder.h5')
-    encoder = load_model('saved_models/'+name+'_encoder.h5')
-    
-    return [autoencoder, encoder]
+ 
+def predictData(model, data):
+    return model.predict(data)
