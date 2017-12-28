@@ -2,8 +2,9 @@ import data_tools as dt
 import autoencoder_tools as at
 import numpy as np
 
-def getIntraparticipantErrors(dataset, autoencoderType): 
-    nSpectators = 11
+def getIntraparticipantErrorsAid(dataset, autoencoderType): 
+    nStimuli = dt.getNumberOfStimuli(dataset)
+    nSpectators = dt.getNumberOfSpectators(dataset)
 
     trainingErrors = []
     testingErrors = []
@@ -11,24 +12,38 @@ def getIntraparticipantErrors(dataset, autoencoderType):
     dataType = dt.getDataType(dataset)
 
     for i in range(nSpectators):
-        trainingData = dt.getNormalisedData(dataset, "1-25", str(i))
-        testingData = dt.getNormalisedData(dataset, "26-30", str(i))
-
+        [trainingData, testingData] = dt.getData(dataset, "1-"+str(nStimuli), str(i), 0.83)
+        
         [autoencoder, _] = at.buildAndTrainAutoencoder(autoencoderType, trainingData, dataType)
 
         predictedTrainingData = at.predictData(autoencoder, trainingData)
         predictedTestingData = at.predictData(autoencoder, testingData)
 
-        trainingError = dt.getAverageRelativeError(trainingData, predictedTrainingData)
-        testingError = dt.getAverageRelativeError(testingData, predictedTestingData)
+        trainingError = dt.getAverageError(trainingData, predictedTrainingData)
+        testingError = dt.getAverageError(testingData, predictedTestingData)
 
         trainingErrors += [trainingError]
         testingErrors += [testingError]
 
-    print('')
-    print("training set :")
-    print("mean : "+str(np.mean(trainingErrors)))
-    print("std : "+str(np.std(trainingErrors)))
-    print("testing set :")
-    print("mean : "+str(np.mean(testingErrors)))
-    print("std : "+str(np.std(testingErrors)))
+    return [np.mean(trainingErrors), np.std(trainingErrors), np.mean(testingErrors), np.std(testingErrors)]
+
+def getIntraparticipantErrors(dataset, autoencoderType, nTrials):
+    meanTrainingErrors = np.zeros(nTrials)
+    stdTrainingErrors = np.zeros(nTrials)
+    meanTestingErrors = np.zeros(nTrials)
+    stdTestingErrors = np.zeros(nTrials)
+    
+    for i in range(nTrials):
+        [meanTrainingErrors[i], stdTrainingErrors[i], meanTestingErrors[i], stdTestingErrors[i]] = getIntraparticipantErrorsAid(dataset, autoencoderType)
+
+    print('\nOver '+str(nTrials)+' trials, the results for dataset '+dataset+' are as follows :')
+    print('Training Errors :')
+    print('Mean of the means : '+str(np.mean(meanTrainingErrors)))
+    print('Standard deviation of the means : '+str(np.std(meanTrainingErrors)))
+    print('Mean of the standard deviations : '+str(np.mean(stdTrainingErrors)))
+    print('Standard deviation of ther standard deviations :  '+str(np.std(stdTrainingErrors)))
+    print('Testing Errors :')
+    print('Mean of the means : '+str(np.mean(meanTestingErrors)))
+    print('Standard deviation of the means : '+str(np.std(meanTestingErrors)))
+    print('Mean of the standard deviations : '+str(np.mean(stdTestingErrors)))
+    print('Standard deviation of ther standard deviations :  '+str(np.std(stdTestingErrors)))
