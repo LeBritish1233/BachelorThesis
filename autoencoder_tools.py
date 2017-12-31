@@ -6,17 +6,12 @@ import numpy as np
 def getLayerSizes(autoencoderType, dataType):
     if autoencoderType == 0:
         if dataType == 0:
-            return [161, 45]# 0 : 5, 1 : 10, 2 : 10, 3 : 45
+            return [161, 45]
         else:
-            return [161, 5]
-    elif autoencoderType == 1:
-        if dataType == 0:
-            return [161, 5]
-        else:
-            return [161, 5]
+            return [161, 35]
     if dataType == 0:
-        return [161, 5]
-    return [161, 5]
+        return [161, 103, 45]
+    return [161, 98, 35]
 
 def buildAutoencoder(layerSizes):
     inputLayer = Input(shape=(layerSizes[0],))
