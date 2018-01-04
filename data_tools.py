@@ -1,40 +1,18 @@
 import scipy.io as sio
 import numpy as np
 
-def getNumberOfStimuli(filename):
-    if filename[-1] == "r":
-        return 10
-    return 30
-
-def getNumberOfSpectators(filename):
-    return 11
-
 def getDataType(filename):
     if filename[0:3] == "ACC":
         return 0
     return 1
 
-def parseArgument(arg):
-    splitArg = list(map(int, arg.split("-")))
-
-    parsedArg = []
-    
-    for i in range(splitArg[0]-1, splitArg[-1]):
-        parsedArg += [i]
-
-    return parsedArg
-
 def normaliseData(data):
-    # find the number of stimuli and spectators
-    nStimuli = data.shape[1]
-    nSpectators = data[0, 0].shape[1]
-
     # find the values for normalisation
     minData = np.inf
     maxData = -np.inf
 
-    for i in range(nStimuli):
-        for j in range(nSpectators):
+    for i in range(data.shape[1]):
+        for j in range(data[0, 0].shape[1]):
             for k in range(data[0, i][0, 0].shape[0]):
                 row = data[0, i][0, j][k, :]
                 minRow = min(row)
@@ -49,12 +27,12 @@ def normaliseData(data):
     
     return data
 
-def extractData(data, stimuli, spectators):
+def extractData(data, stimuli):
     # find the size of the desired normalised data
     nRows = 0
     nCols = data[0, 0][0, 0].shape[1]
     for i in stimuli:
-        for j in spectators:
+        for j in range(data[0, 0].shape[1]):
             nRows += data[0, i][0, j].shape[0]
 
 
@@ -63,7 +41,7 @@ def extractData(data, stimuli, spectators):
     rowCounter = 0
     
     for i in stimuli:
-        for j in spectators:
+        for j in range(data[0, 0].shape[1]):
             for k in range(data[0, i][0, 0].shape[0]):
                 # add the row to the normalised data matrix
                 extractedData[rowCounter, :] = data[0, i][0, j][k, :]
@@ -71,14 +49,7 @@ def extractData(data, stimuli, spectators):
 
     return extractedData
 
-def getData(filename, stimuli, spectators, trainingProportion):
-    # parse the arguments
-    stimuli = parseArgument(stimuli)
-    spectators = parseArgument(spectators)
-
-    trainingStimuli = stimuli[:(int)(np.round(trainingProportion*len(stimuli)))]
-    testingStimuli = stimuli[(int)(np.round(trainingProportion*len(stimuli))):]
-
+def getData(filename, testGroup):
     # get the data from the specified file
     data = sio.loadmat('data/'+filename+'.mat')
     data = data[filename]
@@ -86,8 +57,21 @@ def getData(filename, stimuli, spectators, trainingProportion):
     # normalise the data
     data = normaliseData(data)
 
-    trainingData = extractData(data, trainingStimuli, spectators)
-    testingData = extractData(data, testingStimuli, spectators)
+    # get training and testing stimuli
+    trainingStimuli = []
+    for i in range(data.shape[1]):
+        trainingStimuli += [i]
+
+    groupSize = (int)(data.shape[1]/10)
+    testingStimuli = []
+    for i in range(groupSize):
+        testingStimuli += [groupSize*testGroup+i]
+
+    trainingStimuli = [x for x in trainingStimuli if x not in testingStimuli]
+
+    # extract the data
+    trainingData = extractData(data, trainingStimuli)
+    testingData = extractData(data, testingStimuli)
 
     return [trainingData, testingData]
 
