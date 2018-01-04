@@ -48,7 +48,7 @@ def getIntraparticipantErrors(dataset, autoencoderType, nTrials):
     print('Mean of the standard deviations : '+str(np.mean(stdTestingErrors)))
     print('Standard deviation of ther standard deviations :  '+str(np.std(stdTestingErrors)))
 
-def getIntraparticipantErrorsAid(dataset, autoencoderType): 
+def getInterparticipantErrorsAid(dataset, autoencoderType): 
     nStimuli = dt.getNumberOfStimuli(dataset)
     nSpectators = dt.getNumberOfSpectators(dataset)
 
