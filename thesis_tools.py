@@ -26,13 +26,8 @@ def getMetrics(dataset, autoencoderType):
 
         predictedData = np.load('model_outputs/'+dataset+'_autoencoder_'+str(autoencoderType)+'_group_'+str(i)+'.npy')
 
-        # data = data.flatten()
-        # predictedData = predictedData.flatten()
-
-        metrics[i, 0] = dt.correlationCoefficient(data, predictedData)
-
-        metrics[i, 1] = mean_squared_error(data, predictedData)
-
+        metrics[i, 0] = mean_squared_error(data, predictedData)
+        metrics[i, 1] = dt.correlationCoefficient(data, predictedData)
         metrics[i, 2] = dt.concordanceCorrelationCoefficient(data, predictedData)
     
     for i in range(3):
