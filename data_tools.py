@@ -75,11 +75,25 @@ def getData(filename, testGroup):
 
     return [trainingData, testingData]
 
-def getAverageError(data, predictedData):
-    avgRelErr = 0
+def correlationCoefficient(data, predictedData):
+    n = 0
+    d1 = 0
+    d2 = 0
+    md = np.mean(data)
+    mpd = np.mean(predictedData)
     for i in range(data.shape[0]):
-        avgRelErr += np.linalg.norm(data[i, :]-predictedData[i, :])/np.linalg.norm(data[i, :])
+        for j in range(data.shape[1]):
+            n += (data[i, j]-md)*(predictedData[i, j]-mpd)
+            d1 += (data[i, j]-md)*(data[i, j]-md)
+            d2 += (predictedData[i, j]-mpd)*(predictedData[i, j]-mpd)
 
-    avgRelErr /= data.shape[0]
+    return n/np.sqrt(d1*d2)
 
-    return avgRelErr
+def concordanceCorrelationCoefficient(data, predictedData):
+    cc = correlationCoefficient(data, predictedData)
+    md = np.mean(data)
+    mpd = np.mean(predictedData)
+    stdd = np.std(data)
+    stdpd = np.std(predictedData)
+
+    return 2*cc*stdd*stdpd/(stdd*stdd+stdpd*stdpd+(md-mpd)*(md-mpd))
