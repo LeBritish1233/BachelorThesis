@@ -8,7 +8,7 @@ def getAutoencoderLayerSizes(autoencoderType, dataType):
         if dataType == 0:
             return [161, 45]
         return [161, 35]
-    elif autoencoderType == 1:
+    if autoencoderType == 1:
         if dataType == 0:
             return [161, 103, 45]
         return [161, 98, 35]
@@ -55,5 +55,15 @@ def buildAndTrainAutoencoder(autoencoderType, data, dataType):
 
     return [autoencoder, encoder]
  
-def predictData(model, data):
-    return model.predict(data)
+def getRegressorLayers(regressorType, dataType):
+    if regressorType == 0:
+        if dataType == 0:
+            return [495, 1]
+        return [385, 1]
+    if regressorType == 1:
+        if dataType == 0:
+            return [495, 248, 1]
+        return [385, 193, 1]
+    if dataType == 0:
+        return [495, 330, 166, 1]
+    return [385, 257, 129, 1]

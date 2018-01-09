@@ -75,6 +75,103 @@ def getData(filename, testGroup):
 
     return [trainingData, testingData]
 
+def getEncodedData(filename, encoderType, group):
+    data = sio.loadmat('data/'+filename+'.mat')
+    data = data[filename]
+ 
+    groupSize = (int)(data.shape[1]/10)
+
+    groupStimuli = np.zeros(groupSize, int)
+    for i in range(groupSize):
+        groupStimuli[i] = groupSize*group+i
+
+    groupStimuliSizes = np.zeros(groupSize, int)
+    for i in range(groupSize):
+        groupStimuliSizes[i] = data[0, groupStimuli[i]][0, 0].shape[0]
+
+    encodedData = np.load('model_outputs/'+filename+'_encoder_'+str(encoderType)+'_group_'+str(group)+'.npy')
+
+    reshapedEncodedData = np.zeros((sum(groupStimuliSizes),11*encodedData.shape[1]))
+
+    rc = 0
+
+    for i in range(groupSize):
+        for j in range(11):
+            for k in range(groupStimuliSizes[i]):
+                reshapedEncodedData[k+sum(groupStimuliSizes[:i]), j*encodedData.shape[1]:(j+1)*encodedData.shape[1]] += encodedData[rc, :]
+                rc += 1
+
+    return reshapedEncodedData
+
+
+def getRegressionData(filename, encoderType, testGroup):
+    trainingDataStarted = False
+    for i in range(10):
+        encodedData = getEncodedData(filename, encoderType, i)
+        if i == testGroup:
+            testingData = encodedData
+        elif trainingDataStarted:
+            trainingData = np.concatenate((trainingData, encodedData))
+        else:
+            trainingData = encodedData
+            trainingDataStarted = True
+    return [trainingData, testingData]
+
+def normaliseLabels(labels):
+    minLabels = np.inf
+    maxLabels = -np.inf
+
+    for i in range(labels.shape[1]):
+        for j in range(labels[0, i].shape[0]):
+            label = labels[0, i][j, 0]
+            if label < minLabels:
+                minLabels = label
+            if label > maxLabels:
+                maxLabels = label
+    
+    # normalise the labels
+    labels = (labels-minLabels)/(maxLabels-minLabels)
+
+    return labels
+
+def extractLabels(labels, stimuli):
+    nRows = 0
+    for i in stimuli:
+        nRows += labels[0, i].shape[0]
+
+
+    extractedLabels = np.zeros((nRows, 1))
+    rowCounter = 0
+    
+    for i in stimuli:
+        for j in range(labels[0, i].shape[0]):
+                extractedLabels[rowCounter, 0] = labels[0, i][j, 0]
+                rowCounter += 1
+
+    return extractedLabels
+
+def getLabels(filename, testGroup):
+    labels = sio.loadmat('data/'+filename+'.mat')
+    labels = labels[filename]
+
+    labels = normaliseLabels(labels)
+
+    trainingStimuli = []
+    for i in range(labels.shape[1]):
+        trainingStimuli += [i]
+
+    groupSize = (int)(labels.shape[1]/10)
+    testingStimuli = []
+    for i in range(groupSize):
+        testingStimuli += [groupSize*testGroup+i]
+
+    trainingStimuli = [x for x in trainingStimuli if x not in testingStimuli]
+
+    trainingLabels = extractLabels(labels, trainingStimuli)
+    testingLabels = extractLabels(labels, testingStimuli)
+
+    return [trainingLabels, testingLabels]
+
 def correlationCoefficient(data, predictedData):
     n = 0
     d1 = 0
