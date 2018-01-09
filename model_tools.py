@@ -3,7 +3,7 @@ from keras.models import Model, load_model
 from keras import regularizers
 import numpy as np
 
-def getLayerSizes(autoencoderType, dataType):
+def getAutoencoderLayerSizes(autoencoderType, dataType):
     if autoencoderType == 0:
         if dataType == 0:
             return [161, 45]
@@ -34,7 +34,7 @@ def buildAutoencoder(layerSizes):
     return [autoencoder, encoder]
 
 def buildAndTrainAutoencoder(autoencoderType, data, dataType):
-    layerSizes = getLayerSizes(autoencoderType, dataType)
+    layerSizes = getAutoencoderLayerSizes(autoencoderType, dataType)
 
     [autoencoder, encoder] = buildAutoencoder(layerSizes)
 

@@ -1,5 +1,5 @@
 import data_tools as dt
-import autoencoder_tools as at
+import model_tools as mt
 import numpy as np
 from sklearn.metrics import mean_squared_error
 
@@ -9,7 +9,7 @@ def savePredictedAndEncodedData(dataset, autoencoderType):
 
         dataType = dt.getDataType(dataset)
 
-        [autoencoder, encoder] = at.buildAndTrainAutoencoder(autoencoderType, trainingData, dataType)
+        [autoencoder, encoder] = mt.buildAndTrainAutoencoder(autoencoderType, trainingData, dataType)
 
         predictedData = autoencoder.predict(testingData)
 
