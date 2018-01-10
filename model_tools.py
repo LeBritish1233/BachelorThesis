@@ -55,7 +55,7 @@ def buildAndTrainAutoencoder(autoencoderType, data, dataType):
 
     return [autoencoder, encoder]
  
-def getRegressorLayers(regressorType, dataType):
+def getRegressorLayerSizes(regressorType, dataType):
     if regressorType == 0:
         if dataType == 0:
             return [495, 1]
@@ -75,6 +75,8 @@ def buildRegressor(layerSizes):
         layer = Dense(layerSize, activation='relu', activity_regularizer=regularizers.l1(1e-7))(layer)
     
     regressor = Model(inputLayer, layer)
+    
+    regressor.compile(loss='binary_crossentropy', optimizer='adadelta')
 
     return regressor
 
@@ -98,4 +100,4 @@ def buildAndTrainRegressor(regressorType, trainingData, targetData, dataType):
         lastLoss = loss
         epochCounter += 1
 
-        return regressor
+    return regressor

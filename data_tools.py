@@ -117,7 +117,7 @@ def getEncodedData(filename, encoderType, group):
     return reshapedEncodedData
 
 
-def getRegressionData(filename, encoderType, testGroup):
+def getRegressionInputData(filename, encoderType, testGroup):
     trainingDataStarted = False
     for i in range(10):
         encodedData = getEncodedData(filename, encoderType, i)
