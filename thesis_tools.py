@@ -44,7 +44,7 @@ def saveRegressedData(dataset, labelset, encoderType):
 
         dataType = dt.getDataType(dataset)
 
-        regressor = mt.buildAndTrainRegressor(regressorType, trainingData, trainingLabels, dataType)
+        regressor = mt.buildAndTrainRegressor(trainingData, trainingLabels, dataType)
 
         predictedLabels = regressor.predict(testingData)
 

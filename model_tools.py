@@ -72,8 +72,8 @@ def buildRegressor(layerSizes):
 
     return regressor
 
-def buildAndTrainRegressor(regressorType, trainingData, targetData, dataType):
-    layerSizes = getRegressorLayerSizes(regressorType, dataType)
+def buildAndTrainRegressor(trainingData, targetData, dataType):
+    layerSizes = getRegressorLayerSizes(dataType)
 
     regressor = buildRegressor(layerSizes)
 
