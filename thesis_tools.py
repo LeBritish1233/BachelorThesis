@@ -36,7 +36,7 @@ def getMetricsPredictedData(dataset, autoencoderType):
 
     return metrics
 
-def saveRegressedData(dataset, labelset, encoderType, regressorType):
+def saveRegressedData(dataset, labelset, encoderType):
     for i in range(10):
         [trainingData, testingData] = dt.getRegressionInputData(dataset, encoderType, i)
 
@@ -48,4 +48,21 @@ def saveRegressedData(dataset, labelset, encoderType, regressorType):
 
         predictedLabels = regressor.predict(testingData)
 
-        np.save('model_outputs/'+dataset+'_'+labelset+'_encoder_'+str(encoderType)+'_regressor_'+str(regressorType)+'_group_'+str(i), predictedLabels)
+        np.save('model_outputs/'+dataset+'_'+labelset+'_encoder_'+str(encoderType)+'_group_'+str(i), predictedLabels)
+
+def getMetricsRegressedData(dataset, labelset, encoderType):
+    metrics = np.zeros((12, 3))
+    for i in range(10):
+        [_, labels] = dt.getLabels(labelset, i)
+
+        predictedLabels = np.load('model_outputs/'+dataset+'_'+labelset+'_encoder_'+str(encoderType)+'_group_'+str(i)+'.npy')
+
+        metrics[i, 0] = mean_squared_error(labels, predictedLabels)
+        metrics[i, 1] = dt.correlationCoefficient(labels, predictedLabels)
+        metrics[i, 2] = dt.concordanceCorrelationCoefficient(labels, predictedLabels)
+
+    for i in range(3):
+        metrics[10, i] = np.mean(metrics[:10, i])
+        metrics[11, i] = np.std(metrics[:10, i])
+
+    return metrics

@@ -1,4 +1,5 @@
-thesis_test.py
+thesis_test*
 data/
 __pycache__/
 model_outputs/
+*.swp

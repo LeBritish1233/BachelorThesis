@@ -55,18 +55,10 @@ def buildAndTrainAutoencoder(autoencoderType, data, dataType):
 
     return [autoencoder, encoder]
  
-def getRegressorLayerSizes(regressorType, dataType):
-    if regressorType == 0:
-        if dataType == 0:
-            return [495, 1]
-        return [385, 1]
-    if regressorType == 1:
-        if dataType == 0:
-            return [495, 248, 1]
-        return [385, 193, 1]
+def getRegressorLayerSizes(dataType):
     if dataType == 0:
-        return [495, 330, 166, 1]
-    return [385, 257, 129, 1]
+        return [495, 396, 297, 199, 100, 1]
+    return [385, 308 ,231, 155, 78 ,1]
 
 def buildRegressor(layerSizes):
     inputLayer = Input(shape=(layerSizes[0],))
