@@ -116,11 +116,64 @@ def getEncodedData(filename, encoderType, group):
 
     return reshapedEncodedData
 
+def getEncodedDataCrossed(filename, crossedFilename, encoderType, group):
+    data = sio.loadmat('data/'+filename+'.mat')
+    data = data[filename]
+ 
+    groupSize = (int)(data.shape[1]/10)
+
+    groupStimuli = np.zeros(groupSize, int)
+    for i in range(groupSize):
+        groupStimuli[i] = groupSize*group+i
+
+    groupStimuliSizes = np.zeros(groupSize, int)
+    for i in range(groupSize):
+        groupStimuliSizes[i] = data[0, groupStimuli[i]][0, 0].shape[0]
+
+    if 'lag1' in filename:
+        labels = sio.loadmat('data/Arousal_all_movies_win5_lag1.mat')
+        labels = labels['Arousal_all_movies_win5_lag1']
+    else:
+        labels = sio.loadmat('data/Arousal_all_movies_win5_lag5.mat')
+        labels = labels['Arousal_all_movies_win5_lag5']
+
+    desiredGroupStimuliSizes = np.zeros(groupSize, int)
+    for i in range(groupSize):
+        desiredGroupStimuliSizes[i] = labels[0, groupStimuli[i]].shape[0]
+
+    encodedData = np.load('model_outputs/'+filename+'_crossed_'+crossedFilename+'_encoder_'+str(encoderType)+'_group_'+str(group)+'.npy')
+
+    reshapedEncodedData = np.zeros((sum(desiredGroupStimuliSizes),data[0, 0].shape[1]*encodedData.shape[1]))
+
+    rc = 0
+
+    for i in range(groupSize):
+        for j in range(data[0, 0].shape[1]):
+            for k in range(desiredGroupStimuliSizes[i]):
+                reshapedEncodedData[k+sum(desiredGroupStimuliSizes[:i]), j*encodedData.shape[1]:(j+1)*encodedData.shape[1]] += encodedData[rc, :]
+                rc += 1
+                if k == desiredGroupStimuliSizes[i]-1:
+                    rc += groupStimuliSizes[i]-desiredGroupStimuliSizes[i]
+
+    return reshapedEncodedData
 
 def getRegressionInputData(filename, encoderType, testGroup):
     trainingDataStarted = False
     for i in range(10):
         encodedData = getEncodedData(filename, encoderType, i)
+        if i == testGroup:
+            testingData = encodedData
+        elif trainingDataStarted:
+            trainingData = np.concatenate((trainingData, encodedData))
+        else:
+            trainingData = encodedData
+            trainingDataStarted = True
+    return [trainingData, testingData]
+
+def getRegressionInputDataCrossed(filename, crossedFilename, encoderType, testGroup):
+    trainingDataStarted = False
+    for i in range(10):
+        encodedData = getEncodedDataCrossed(filename, crossedFilename, encoderType, i)
         if i == testGroup:
             testingData = encodedData
         elif trainingDataStarted:

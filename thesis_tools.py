@@ -44,7 +44,6 @@ def savePredictedAndEncodedDataCrossed(dataset, autoencoderType):
 
         [_, testingData] = dt.getData(dataset, i)
 
-
         dataType = dt.getDataType(dataset)
 
         [autoencoder, encoder] = mt.buildAndTrainAutoencoder(autoencoderType, trainingData, dataType)
@@ -95,6 +94,39 @@ def getMetricsRegressedData(dataset, labelset, encoderType):
         [_, labels] = dt.getLabels(labelset, i)
 
         predictedLabels = np.load('model_outputs/'+dataset+'_'+labelset+'_encoder_'+str(encoderType)+'_group_'+str(i)+'.npy')
+
+        metrics[i, 0] = mean_squared_error(labels, predictedLabels)
+        metrics[i, 1] = dt.correlationCoefficient(labels, predictedLabels)
+        metrics[i, 2] = dt.concordanceCorrelationCoefficient(labels, predictedLabels)
+
+    for i in range(3):
+        metrics[10, i] = np.mean(metrics[:10, i])
+        metrics[11, i] = np.std(metrics[:10, i])
+
+    return metrics
+
+def saveRegressedDataCrossed(dataset, labelset, encoderType):
+    crossedDataset = dt.getCrossedDataset(dataset)
+    for i in range(10):
+        [trainingData, testingData] = dt.getRegressionInputDataCrossed(dataset, crossedDataset, encoderType, i)
+
+        [trainingLabels, _] = dt.getLabels(labelset, i)
+
+        dataType = dt.getDataType(dataset)
+
+        regressor = mt.buildAndTrainRegressor(trainingData, trainingLabels, dataType)
+
+        predictedLabels = regressor.predict(testingData)
+
+        np.save('model_outputs/'+dataset+'_crossed_'+crossedDataset+'_'+labelset+'_encoder_'+str(encoderType)+'_group_'+str(i), predictedLabels)
+
+def getMetricsRegressedDataCrossed(dataset, labelset, encoderType):
+    metrics = np.zeros((12, 3))
+    crossedDataset = dt.getCrossedDataset(dataset)
+    for i in range(10):
+        [_, labels] = dt.getLabels(labelset, i)
+
+        predictedLabels = np.load('model_outputs/'+dataset+'_crossed_'+crossedDataset+'_'+labelset+'_encoder_'+str(encoderType)+'_group_'+str(i)+'.npy')
 
         metrics[i, 0] = mean_squared_error(labels, predictedLabels)
         metrics[i, 1] = dt.correlationCoefficient(labels, predictedLabels)
