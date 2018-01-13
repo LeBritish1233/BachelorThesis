@@ -185,6 +185,24 @@ def getLabels(filename, testGroup):
 
     return [trainingLabels, testingLabels]
 
+def getCrossedDataset(dataset):
+    if dataset == 'ACC_filtered_slid_win5_lag1_LIRIS':
+        return 'ACC_filtered_slid_win5_lag1_Technicolor'
+    if dataset == 'ACC_filtered_slid_win5_lag1_Technicolor':
+        return 'ACC_filtered_slid_win5_lag1_LIRIS'
+    if dataset == 'ACC_filtered_slid_win5_lag5_LIRIS':
+        return 'ACC_filtered_slid_win5_lag5_Technicolor'
+    if dataset == 'ACC_filtered_slid_win5_lag5_Technicolor':
+        return 'ACC_filtered_slid_win5_lag5_LIRIS'
+    if dataset == 'GSR_filtered_slid_win5_lag1_LIRIS':
+        return 'GSR_filtered_slid_win5_lag1_Technicolor'
+    if dataset == 'GSR_filtered_slid_win5_lag1_Technicolor':
+        return 'GSR_filtered_slid_win5_lag1_LIRIS'
+    if dataset == 'GSR_filtered_slid_win5_lag5_LIRIS':
+        return 'GSR_filtered_slid_win5_lag5_Technicolor'
+    if dataset == 'GSR_filtered_slid_win5_lag5_Technicolor':
+        return 'GSR_filtered_slid_win5_lag5_LIRIS'
+
 def correlationCoefficient(data, predictedData):
     n = 0
     d1 = 0

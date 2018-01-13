@@ -36,6 +36,43 @@ def getMetricsPredictedData(dataset, autoencoderType):
 
     return metrics
 
+def savePredictedAndEncodedDataCrossed(dataset, autoencoderType):
+    crossedDataset = dt.getCrossedDataset(dataset)
+
+    [trainingData, trainingDataComplement] = dt.getData(crossedDataset, 9)
+
+    [testingData, testingDataComplement] = dt.getData(dataset, 9)
+
+    trainingData = np.concatenate((trainingData, trainingDataComplement))
+
+    testingData = np.concatenate((testingData, testingDataComplement))
+
+    dataType = dt.getDataType(dataset)
+
+    [autoencoder, encoder] = mt.buildAndTrainAutoencoder(autoencoderType, trainingData, dataType)
+
+    predictedData = autoencoder.predict(testingData)
+
+    encodedData = encoder.predict(testingData)
+
+    np.save('model_outputs/'+dataset+'_crossed_'+crossedDataset+'_autoencoder_'+str(autoencoderType), predictedData)
+
+    np.save('model_outputs/'+dataset+'_crossed_'+crossedDataset+'_encoder_'+str(autoencoderType), encodedData)
+
+def getMetricsPredictedDataCrossed(dataset, autoencoderType):
+    metrics = np.zeros(3)
+    [_, data] = dt.getData(dataset, i)
+
+    crossedDataset = dt.getCrossedDataset(dataset)
+
+    predictedData = np.load('model_outputs/'+dataset+'_crossed_'+crossedDataset+'_autoencoder_'+str(autoencoderType)+'.npy')
+
+    metrics[0] = mean_squared_error(data, predictedData)
+    metrics[1] = dt.correlationCoefficient(data, predictedData)
+    metrics[2] = dt.concordanceCorrelationCoefficient(data, predictedData)
+
+    return metrics
+
 def saveRegressedData(dataset, labelset, encoderType):
     for i in range(10):
         [trainingData, testingData] = dt.getRegressionInputData(dataset, encoderType, i)
@@ -51,6 +88,36 @@ def saveRegressedData(dataset, labelset, encoderType):
         np.save('model_outputs/'+dataset+'_'+labelset+'_encoder_'+str(encoderType)+'_group_'+str(i), predictedLabels)
 
 def getMetricsRegressedData(dataset, labelset, encoderType):
+    metrics = np.zeros((12, 3))
+    for i in range(10):
+        [_, labels] = dt.getLabels(labelset, i)
+
+        predictedLabels = np.load('model_outputs/'+dataset+'_'+labelset+'_encoder_'+str(encoderType)+'_group_'+str(i)+'.npy')
+
+        metrics[i, 0] = mean_squared_error(labels, predictedLabels)
+        metrics[i, 1] = dt.correlationCoefficient(labels, predictedLabels)
+        metrics[i, 2] = dt.concordanceCorrelationCoefficient(labels, predictedLabels)
+
+    for i in range(3):
+        metrics[10, i] = np.mean(metrics[:10, i])
+        metrics[11, i] = np.std(metrics[:10, i])
+
+    return metrics
+
+def saveRegressedDataCrossed(dataset, labelset, encoderType):
+        [trainingData, testingData] = dt.getRegressionInputDataCrossed(dataset, encoderType)
+
+        [trainingLabels, _] = dt.getLabelsCrossed(labelset, i)
+
+        dataType = dt.getDataType(dataset)
+
+        regressor = mt.buildAndTrainRegressor(trainingData, trainingLabels, dataType)
+
+        predictedLabels = regressor.predict(testingData)
+
+        np.save('model_outputs/'+dataset+'_'+labelset+'_encoder_'+str(encoderType)+'_group_'+str(i), predictedLabels)
+
+def getMetricsRegressedDataCrossed(dataset, labelset, encoderType):
     metrics = np.zeros((12, 3))
     for i in range(10):
         [_, labels] = dt.getLabels(labelset, i)
