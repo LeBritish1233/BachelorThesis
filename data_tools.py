@@ -264,9 +264,9 @@ def correlationCoefficient(data, predictedData):
     mpd = np.mean(predictedData)
     for i in range(data.shape[0]):
         for j in range(data.shape[1]):
-            n += (data[i, j]-md)*(predictedData[i, j]-mpd)
-            d1 += (data[i, j]-md)*(data[i, j]-md)
-            d2 += (predictedData[i, j]-mpd)*(predictedData[i, j]-mpd)
+            n += np.absolute((data[i, j]-md))*np.absolute((predictedData[i, j]-mpd))
+            d1 += np.absolute((data[i, j]-md))*np.absolute((data[i, j]-md))
+            d2 += np.absolute((predictedData[i, j]-mpd))*np.absolute((predictedData[i, j]-mpd))
 
     return n/np.sqrt(d1*d2)
 

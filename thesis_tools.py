@@ -31,8 +31,12 @@ def getMetricsPredictedData(dataset, autoencoderType):
         metrics[i, 2] = dt.concordanceCorrelationCoefficient(data, predictedData)
     
     for i in range(3):
-        metrics[10, i] = np.mean(metrics[:10, i])
-        metrics[11, i] = np.std(metrics[:10, i])
+        elements = []
+        for j in range(10):
+            if metrics[j, i] == metrics[j, i]:
+                elements += [metrics[j, i]]
+        metrics[10, i] = np.mean(elements)
+        metrics[11, i] = np.std(elements)
 
     return metrics
 
@@ -69,8 +73,12 @@ def getMetricsPredictedDataCrossed(dataset, autoencoderType):
         metrics[i, 2] = dt.concordanceCorrelationCoefficient(data, predictedData)
     
     for i in range(3):
-        metrics[10, i] = np.mean(metrics[:10, i])
-        metrics[11, i] = np.std(metrics[:10, i])
+        elements = []
+        for j in range(10):
+            if metrics[j, i] == metrics[j, i]:
+                elements += [metrics[j, i]]
+        metrics[10, i] = np.mean(elements)
+        metrics[11, i] = np.std(elements)
 
     return metrics
 
@@ -100,8 +108,12 @@ def getMetricsRegressedData(dataset, labelset, encoderType):
         metrics[i, 2] = dt.concordanceCorrelationCoefficient(labels, predictedLabels)
 
     for i in range(3):
-        metrics[10, i] = np.mean(metrics[:10, i])
-        metrics[11, i] = np.std(metrics[:10, i])
+        elements = []
+        for j in range(10):
+            if metrics[j, i] == metrics[j, i]:
+                elements += [metrics[j, i]]
+        metrics[10, i] = np.mean(elements)
+        metrics[11, i] = np.std(elements)
 
     return metrics
 
@@ -133,7 +145,11 @@ def getMetricsRegressedDataCrossed(dataset, labelset, encoderType):
         metrics[i, 2] = dt.concordanceCorrelationCoefficient(labels, predictedLabels)
 
     for i in range(3):
-        metrics[10, i] = np.mean(metrics[:10, i])
-        metrics[11, i] = np.std(metrics[:10, i])
+        elements = []
+        for j in range(10):
+            if metrics[j, i] == metrics[j, i]:
+                elements += [metrics[j, i]]
+        metrics[10, i] = np.mean(elements)
+        metrics[11, i] = np.std(elements)
 
     return metrics
